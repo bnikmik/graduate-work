@@ -20,9 +20,9 @@ import static ru.skypro.homework.enums.Role.USER;
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
-
     private final AuthService authService;
 
+    //TODO:исправь
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginReqDTO req) {
         if (authService.login(req.getUsername(), req.getPassword())) {

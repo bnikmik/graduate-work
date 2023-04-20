@@ -13,7 +13,7 @@ public interface AdsService {
 
     ResponseWrapperAdsDTO getAllAds();
 
-    AdsDTO addAd(MultipartFile image, CreateAdsDTO properties,  Authentication authentication) throws IOException;
+    AdsDTO addAd(MultipartFile image, CreateAdsDTO properties,  Authentication authentication);
 
     FullAdsDTO getAdById(Integer id);
 
@@ -27,4 +27,5 @@ public interface AdsService {
 
     byte[] showImageOnId(Integer id);
 
+    ResponseWrapperAdsDTO searchByTitle(String title);
 }

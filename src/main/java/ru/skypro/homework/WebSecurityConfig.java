@@ -5,6 +5,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,13 +28,20 @@ public class WebSecurityConfig {
         this.dataSource = dataSource;
     }
 
+//    @Autowired
+//    public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.jdbcAuthentication().dataSource(dataSource);
+//    }
+
     private static final String[] AUTH_WHITELIST = {
             "/swagger-resources/**",
             "/swagger-ui.html",
             "/v3/api-docs",
             "/webjars/**",
             "/login",
-            "/register"
+            "/register",
+            "/ads",
+            "/ads/image/**"
     };
 
     @Bean
@@ -42,12 +50,6 @@ public class WebSecurityConfig {
         jdbcUserDetailsManager.setDataSource(dataSource);
         return jdbcUserDetailsManager;
     }
-
-//
-//    @Bean
-//    public UserDetailsManager userDetailsService(DataSource dataSource) {
-//        return new JdbcUserDetailsManager(dataSource);
-//    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

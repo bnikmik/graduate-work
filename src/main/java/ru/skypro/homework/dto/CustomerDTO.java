@@ -14,14 +14,6 @@ public class CustomerDTO {
     private String phone;
     private String image;
 
-    public Customer toModel() {
-        Customer customer = new Customer();
-        customer.setUsername(email);
-        customer.setFirstName(firstName);
-        customer.setLastName(lastName);
-        customer.setPhone(phone);
-        return customer;
-    }
     public static CustomerDTO fromModel(Customer customer) {
         CustomerDTO dto = new CustomerDTO();
         dto.setId(customer.getId());

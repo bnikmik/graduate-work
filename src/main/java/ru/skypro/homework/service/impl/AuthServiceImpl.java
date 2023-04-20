@@ -6,11 +6,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.RegisterReqDTO;
-import ru.skypro.homework.exception.BadParamException;
 import ru.skypro.homework.exception.ConflictException;
 import ru.skypro.homework.repository.CustomerRepository;
 import ru.skypro.homework.service.AuthService;
 
+import static ru.skypro.homework.enums.Role.ADMIN;
 import static ru.skypro.homework.enums.Role.USER;
 
 @Service
@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
             .passwordEncoder(this.encoder::encode)
             .password(dto.getPassword())
             .username(dto.getUsername())
-            .roles(USER.name())
+            .roles(ADMIN.name())
             .build());
     customerRepository.save(dto.toModel());
   }

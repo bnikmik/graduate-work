@@ -21,7 +21,7 @@ public class Ad {
     @Lob
     @Type(type = "org.hibernate.type.ImageType")
     private byte[] image;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
     @OneToMany(mappedBy = "ad")
     private List<Comment> comments;

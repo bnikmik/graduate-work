@@ -10,4 +10,11 @@ import java.util.List;
 public class ResponseWrapperCommentDTO {
     private Integer count;
     private List<CommentDTO> results;
+
+    public static ResponseWrapperCommentDTO fromModel(List<CommentDTO> list) {
+        ResponseWrapperCommentDTO dto = new ResponseWrapperCommentDTO();
+        dto.setCount(list.size());
+        dto.setResults(list);
+        return dto;
+    }
 }
