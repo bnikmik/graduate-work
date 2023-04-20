@@ -1,21 +1,14 @@
 package ru.skypro.homework.controller;
 
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import ru.skypro.homework.dto.AdsDTO;
-import ru.skypro.homework.dto.CreateAdsDTO;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.dto.CreateAdsDTO;
 import ru.skypro.homework.service.AdsService;
-
-import javax.validation.Valid;
-import java.io.IOException;
-import java.io.InputStream;
 
 @RestController
 @CrossOrigin(value = "http://localhost:3000")
@@ -34,8 +27,7 @@ public class AdsController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> addAd(@RequestPart("image") MultipartFile image, @RequestPart CreateAdsDTO properties,
-                                   Authentication authentication) {
+    public ResponseEntity<?> addAd(@RequestPart("image") MultipartFile image, @RequestPart CreateAdsDTO properties, Authentication authentication) {
         return ResponseEntity.ok(adsService.addAd(image, properties, authentication));
     }
 
@@ -44,16 +36,14 @@ public class AdsController {
         return ResponseEntity.ok(adsService.getAdById(id));
     }
 
-    @PreAuthorize("adsServiceImpl.getAdById(#id).email" +
-            "== authentication.principal.username or (hasAuthority('ADMIN'))")
+    @PreAuthorize("adsServiceImpl.getAdById(#id).email" + "== authentication.principal.username or (hasAuthority('ADMIN'))")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAdById(@PathVariable Integer id) {
         adsService.deleteAdById(id);
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("adsServiceImpl.getAdById(#id).email" +
-            "== authentication.principal.username or (hasAuthority('ADMIN'))")
+    @PreAuthorize("adsServiceImpl.getAdById(#id).email" + "== authentication.principal.username or (hasAuthority('ADMIN'))")
     @PatchMapping("/{id}")
     public ResponseEntity<?> updateAd(@PathVariable Integer id, @RequestBody CreateAdsDTO properties) {
         return ResponseEntity.ok(adsService.updateAd(id, properties));
@@ -64,8 +54,7 @@ public class AdsController {
         return ResponseEntity.ok(adsService.getMyAds(authentication));
     }
 
-    @PreAuthorize("adsServiceImpl.getAdById(#id).email" +
-            "== authentication.principal.username or (hasAuthority('ADMIN'))")
+    @PreAuthorize("adsServiceImpl.getAdById(#id).email" + "== authentication.principal.username or (hasAuthority('ADMIN'))")
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateAdImage(@PathVariable Integer id, @RequestParam MultipartFile image) {
         adsService.updateAdImage(id, image);

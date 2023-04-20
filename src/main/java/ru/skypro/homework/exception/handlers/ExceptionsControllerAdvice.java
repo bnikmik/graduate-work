@@ -1,9 +1,9 @@
 package ru.skypro.homework.exception.handlers;
 
-import ru.skypro.homework.exception.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.skypro.homework.exception.*;
 
 @ControllerAdvice
 public class ExceptionsControllerAdvice {

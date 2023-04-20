@@ -2,7 +2,6 @@ package ru.skypro.homework.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Comment;
 
 @Getter
@@ -15,12 +14,6 @@ public class CommentDTO {
     private Integer pk;
     private String text;
 
-    public Comment toModel() {
-        Comment comment = new Comment();
-        comment.setText(text);
-        return comment;
-    }
-
     public static CommentDTO fromModel(Comment comment) {
         CommentDTO dto = new CommentDTO();
         dto.setAuthor(comment.getCustomer().getId());
@@ -30,6 +23,12 @@ public class CommentDTO {
         dto.setPk(comment.getId());
         dto.setText(comment.getText());
         return dto;
+    }
+
+    public Comment toModel() {
+        Comment comment = new Comment();
+        comment.setText(text);
+        return comment;
     }
 
 }

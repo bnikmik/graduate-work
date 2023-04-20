@@ -1,7 +1,6 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,14 +11,11 @@ import ru.skypro.homework.dto.FullAdsDTO;
 import ru.skypro.homework.dto.ResponseWrapperAdsDTO;
 import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.model.Ad;
-import ru.skypro.homework.model.Customer;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CustomerRepository;
 import ru.skypro.homework.service.AdsService;
 
-import java.awt.*;
-import java.io.*;
-import java.util.List;
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 @Service

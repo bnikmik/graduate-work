@@ -24,7 +24,7 @@ public class FullAdsDTO {
         dto.setAuthorLastName(ad.getCustomer().getLastName());
         dto.setDescription(ad.getDescription());
         dto.setEmail(ad.getCustomer().getUsername());
-        dto.setImage("/ads/image/"+ ad.getId());
+        dto.setImage("/ads/image/" + ad.getId());
         dto.setPhone(ad.getCustomer().getPhone());
         dto.setPrice(ad.getPrice());
         dto.setTitle(ad.getTitle());
