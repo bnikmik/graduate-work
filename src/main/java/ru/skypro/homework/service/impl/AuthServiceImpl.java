@@ -5,19 +5,24 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.RegisterReq;
-import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.dto.RegisterReqDTO;
+import ru.skypro.homework.exception.BadParamException;
+import ru.skypro.homework.exception.ConflictException;
+import ru.skypro.homework.repository.CustomerRepository;
 import ru.skypro.homework.service.AuthService;
+
+import static ru.skypro.homework.enums.Role.USER;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
   private final UserDetailsManager manager;
-
+  private final CustomerRepository customerRepository;
   private final PasswordEncoder encoder;
 
-  public AuthServiceImpl(UserDetailsManager manager, PasswordEncoder passwordEncoder) {
+  public AuthServiceImpl(UserDetailsManager manager, CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
     this.manager = manager;
+    this.customerRepository = customerRepository;
     this.encoder = passwordEncoder;
   }
 
@@ -31,17 +36,17 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public boolean register(RegisterReq registerReq, Role role) {
-    if (manager.userExists(registerReq.getUsername())) {
-      return false;
+  public void register(RegisterReqDTO dto) {
+    if (manager.userExists(dto.getUsername())) {
+      throw new ConflictException();
     }
     manager.createUser(
         User.builder()
             .passwordEncoder(this.encoder::encode)
-            .password(registerReq.getPassword())
-            .username(registerReq.getUsername())
-            .roles(role.name())
+            .password(dto.getPassword())
+            .username(dto.getUsername())
+            .roles(USER.name())
             .build());
-    return true;
+    customerRepository.save(dto.toModel());
   }
 }
