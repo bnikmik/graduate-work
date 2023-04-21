@@ -23,6 +23,6 @@ public class Ad {
     private byte[] image;
     @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
-    @OneToMany(mappedBy = "ad",cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "ad", cascade = CascadeType.REMOVE)
     private List<Comment> comments;
 }

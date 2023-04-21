@@ -38,21 +38,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 class CustomerControllerTest {
 
+    private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
+    private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired
     private JdbcUserDetailsManager jdbcUserDetailsManager;
     private ObjectMapper objectMapper;
-
     private CustomerDTO customerDTO;
     private UserDetails userDetails;
     private Authentication auth;
     private Customer customer;
-    private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
-    private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
 
     @BeforeEach
     void setUp() throws Exception {

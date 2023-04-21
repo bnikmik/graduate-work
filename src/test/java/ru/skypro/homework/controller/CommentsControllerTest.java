@@ -41,18 +41,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Testcontainers
 class CommentsControllerTest {
+    private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
+    private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private JdbcUserDetailsManager jdbcUserDetailsManager;
     @Autowired
     private AdRepository adRepository;
     @Autowired
     private CustomerRepository customerRepository;
-
     private ObjectMapper objectMapper;
-
     @Autowired
     private CommentRepository commentRepository;
     private UserDetails userDetails;
@@ -60,10 +59,7 @@ class CommentsControllerTest {
     private Ad ad;
     private Customer customer;
     private Comment comment;
-
     private CommentDTO commentDTO;
-    private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
-    private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
 
     @BeforeEach
     void setUp() throws Exception {
@@ -184,7 +180,7 @@ class CommentsControllerTest {
     }
 
     @Test
-    void updateCommentById() throws Exception{
+    void updateCommentById() throws Exception {
         mockMvc.perform(patch("/ads/" + ad.getId() + "/comments/" + comment.getId()).with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentDTO)))

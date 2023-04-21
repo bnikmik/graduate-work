@@ -39,11 +39,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AdsControllerTest {
+    private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
+    private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private AdRepository adRepository;
-
     @Autowired
     private JdbcUserDetailsManager jdbcUserDetailsManager;
     @Autowired
@@ -52,11 +53,7 @@ class AdsControllerTest {
     private Authentication auth;
     private Ad ad;
     private AdsDTO adsDTO;
-
     private UserDetails userDetails;
-
-    private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
-    private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
 
     @BeforeEach
     void setUp() throws Exception {
