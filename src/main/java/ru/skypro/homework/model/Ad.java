@@ -19,10 +19,10 @@ public class Ad {
     private String title;
     private String description;
     @Lob
-    @Type(type = "org.hibernate.type.ImageType")
+    @Type(type = "org.hibernate.type.BinaryType")
     private byte[] image;
     @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
-    @OneToMany(mappedBy = "ad")
+    @OneToMany(mappedBy = "ad",cascade = CascadeType.REMOVE)
     private List<Comment> comments;
 }

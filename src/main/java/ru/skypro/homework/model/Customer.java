@@ -20,10 +20,10 @@ public class Customer {
     private String lastName;
     private String phone;
     @Lob
-    @Type(type = "org.hibernate.type.ImageType")
+    @Type(type = "org.hibernate.type.BinaryType")
     private byte[] avatar;
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.REMOVE)
     private List<Ad> ads;
-    @OneToMany(mappedBy = "customer")
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.REMOVE)
     private List<Comment> comments;
 }

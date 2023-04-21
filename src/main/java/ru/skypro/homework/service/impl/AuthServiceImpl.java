@@ -12,6 +12,7 @@ import ru.skypro.homework.repository.CustomerRepository;
 import ru.skypro.homework.service.AuthService;
 
 import static ru.skypro.homework.enums.Role.ADMIN;
+import static ru.skypro.homework.enums.Role.USER;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -43,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
                         .passwordEncoder(this.encoder::encode)
                         .password(dto.getPassword())
                         .username(dto.getUsername())
-                        .roles(ADMIN.name())
+                        .roles(USER.name())
                         .build());
         customerRepository.save(dto.toModel());
     }
