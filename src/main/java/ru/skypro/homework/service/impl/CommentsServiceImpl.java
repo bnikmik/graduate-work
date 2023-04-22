@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.CommentDTO;
 import ru.skypro.homework.dto.ResponseWrapperCommentDTO;
+import ru.skypro.homework.exception.BadParamException;
 import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.repository.AdRepository;
@@ -38,6 +39,7 @@ public class CommentsServiceImpl implements CommentsService {
 
     @Override
     public CommentDTO addCommentToAdById(Integer id, CommentDTO commentDTO, Authentication authentication) {
+        if (commentDTO.getText() == null || commentDTO.getText().isBlank()) throw new BadParamException();
         Comment comment = commentDTO.toModel();
         comment.setCustomer(customerRepository.findByUsername(authentication.getName()).orElseThrow(NotFoundException::new));
         comment.setAd(adRepository.findById(id).orElseThrow(NotFoundException::new));
@@ -53,6 +55,7 @@ public class CommentsServiceImpl implements CommentsService {
 
     @Override
     public CommentDTO updateCommentById(Integer adId, Integer commentId, CommentDTO commentDTO) {
+        if (commentDTO.getText() == null || commentDTO.getText().isBlank()) throw new BadParamException();
         Comment comment = commentRepository.findByIdAndAdId(commentId, adId).orElseThrow(NotFoundException::new);
         comment.setText(commentDTO.getText());
         return CommentDTO.fromModel(commentRepository.save(comment));

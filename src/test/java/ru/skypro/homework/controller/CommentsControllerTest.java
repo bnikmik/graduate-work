@@ -8,18 +8,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import ru.skypro.homework.dto.CommentDTO;
-import ru.skypro.homework.enums.Role;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.model.Customer;
@@ -28,10 +22,7 @@ import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.CustomerRepository;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,25 +37,20 @@ class CommentsControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private JdbcUserDetailsManager jdbcUserDetailsManager;
-    @Autowired
     private AdRepository adRepository;
     @Autowired
     private CustomerRepository customerRepository;
     private ObjectMapper objectMapper;
     @Autowired
     private CommentRepository commentRepository;
-    private UserDetails userDetails;
-    private Authentication auth;
     private Ad ad;
-    private Customer customer;
     private Comment comment;
     private CommentDTO commentDTO;
 
     @BeforeEach
     void setUp() throws Exception {
         objectMapper = new ObjectMapper();
-        customer = new Customer();
+        Customer customer = new Customer();
         customer.setId(1);
         customer.setUsername("test@test.com");
         customer.setFirstName("testFirst");
@@ -99,62 +85,19 @@ class CommentsControllerTest {
         commentDTO.setCreatedAt(comment.getCreatedAt().toEpochMilli());
         commentDTO.setPk(comment.getId());
         commentDTO.setText(comment.getText());
-
-
-        userDetails = new UserDetails() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return List.of(new SimpleGrantedAuthority(Role.USER.name()));
-            }
-
-            @Override
-            public String getPassword() {
-                return "password";
-            }
-
-            @Override
-            public String getUsername() {
-                return customer.getUsername();
-            }
-
-            @Override
-            public boolean isAccountNonExpired() {
-                return true;
-            }
-
-            @Override
-            public boolean isAccountNonLocked() {
-                return true;
-            }
-
-            @Override
-            public boolean isCredentialsNonExpired() {
-                return true;
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
-        };
-
-        jdbcUserDetailsManager.createUser(userDetails);
-        auth = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
-                userDetails.getPassword(),
-                userDetails.getAuthorities());
     }
 
     @AfterEach
     void tearDown() {
-        jdbcUserDetailsManager.deleteUser(customer.getUsername());
         customerRepository.deleteAll();
         adRepository.deleteAll();
         commentRepository.deleteAll();
     }
 
     @Test
-    void getAllCommentsByAdId() throws Exception {
-        mockMvc.perform(get("/ads/" + ad.getId() + "/comments").with(authentication(auth)))
+    @WithMockUser(username = "test@test.com")
+    void testGetAllCommentsByAdId() throws Exception {
+        mockMvc.perform(get("/ads/" + ad.getId() + "/comments"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count").isNumber())
                 .andExpect(jsonPath("$.results").isArray())
@@ -162,8 +105,9 @@ class CommentsControllerTest {
     }
 
     @Test
-    void addCommentToAdById() throws Exception {
-        mockMvc.perform(post("/ads/" + ad.getId() + "/comments").with(authentication(auth))
+    @WithMockUser(username = "test@test.com")
+    void testAddCommentToAdById() throws Exception {
+        mockMvc.perform(post("/ads/" + ad.getId() + "/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentDTO)))
                 .andExpect(status().isOk())
@@ -174,14 +118,16 @@ class CommentsControllerTest {
     }
 
     @Test
-    void deleteCommentById() throws Exception {
-        mockMvc.perform(delete("/ads/" + ad.getId() + "/comments/" + comment.getId()).with(authentication(auth)))
+    @WithMockUser(username = "test@test.com")
+    void testDeleteCommentById() throws Exception {
+        mockMvc.perform(delete("/ads/" + ad.getId() + "/comments/" + comment.getId()))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void updateCommentById() throws Exception {
-        mockMvc.perform(patch("/ads/" + ad.getId() + "/comments/" + comment.getId()).with(authentication(auth))
+    @WithMockUser(username = "test@test.com")
+    void testUpdateCommentById() throws Exception {
+        mockMvc.perform(patch("/ads/" + ad.getId() + "/comments/" + comment.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentDTO)))
                 .andExpect(status().isOk());

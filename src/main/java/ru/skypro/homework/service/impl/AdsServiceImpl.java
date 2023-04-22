@@ -9,6 +9,7 @@ import ru.skypro.homework.dto.AdsDTO;
 import ru.skypro.homework.dto.CreateAdsDTO;
 import ru.skypro.homework.dto.FullAdsDTO;
 import ru.skypro.homework.dto.ResponseWrapperAdsDTO;
+import ru.skypro.homework.exception.BadParamException;
 import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.repository.AdRepository;
@@ -40,6 +41,9 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public AdsDTO addAd(MultipartFile image, CreateAdsDTO properties, Authentication authentication) {
+        if (properties.getDescription() == null || properties.getDescription().isBlank() ||
+                properties.getTitle() == null || properties.getTitle().isBlank())
+            throw new BadParamException();
         Ad ad = properties.toModel();
         ad.setCustomer(customerRepository.findByUsername(authentication.getName())
                 .orElseThrow(NotFoundException::new));
@@ -65,6 +69,9 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public AdsDTO updateAd(Integer id, CreateAdsDTO properties) {
+        if (properties.getDescription() == null || properties.getDescription().isBlank() ||
+                properties.getTitle() == null || properties.getTitle().isBlank())
+            throw new BadParamException();
         Ad ad = adRepository.findById(id).orElseThrow(NotFoundException::new);
         ad.setTitle(properties.getTitle());
         ad.setDescription(properties.getDescription());

@@ -9,12 +9,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -27,7 +26,6 @@ import ru.skypro.homework.repository.CustomerRepository;
 import java.util.Collection;
 import java.util.List;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -38,8 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 class CustomerControllerTest {
 
-    private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
-    private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -48,9 +44,9 @@ class CustomerControllerTest {
     private JdbcUserDetailsManager jdbcUserDetailsManager;
     private ObjectMapper objectMapper;
     private CustomerDTO customerDTO;
-    private UserDetails userDetails;
-    private Authentication auth;
     private Customer customer;
+    private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
+    private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
 
     @BeforeEach
     void setUp() throws Exception {
@@ -71,7 +67,7 @@ class CustomerControllerTest {
         customerDTO.setLastName(customer.getLastName());
         customerDTO.setPhone(customer.getPhone());
         customerDTO.setImage("/users/me/image/" + customer.getId());
-        userDetails = new UserDetails() {
+        UserDetails userDetails = new UserDetails() {
             @Override
             public Collection<? extends GrantedAuthority> getAuthorities() {
                 return List.of(new SimpleGrantedAuthority(Role.USER.name()));
@@ -108,10 +104,6 @@ class CustomerControllerTest {
             }
         };
         jdbcUserDetailsManager.createUser(userDetails);
-        auth = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
-                userDetails.getPassword(),
-                userDetails.getAuthorities());
-
     }
 
     @AfterEach
@@ -121,39 +113,41 @@ class CustomerControllerTest {
     }
 
     @Test
-    void setPassword() throws Exception {
+    @WithMockUser(username = "test@test.com")
+    void testSetPassword() throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("currentPassword", "password");
         jsonObject.put("newPassword", "newPassword");
         mockMvc.perform(post("/users/set_password")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonObject.toString()).with(authentication(auth)))
+                        .content(jsonObject.toString()))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
-    void getMyInfo() throws Exception {
-        mockMvc.perform(get("/users/me").with(authentication(auth)))
+    @WithMockUser(username = "test@test.com")
+    void testGetMyInfo() throws Exception {
+        mockMvc.perform(get("/users/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(customer.getUsername()));
     }
 
     @Test
-    void updateMyInfo() throws Exception {
+    @WithMockUser(username = "test@test.com")
+    void testUpdateMyInfo() throws Exception {
         mockMvc.perform(patch("/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerDTO))
-                        .with(authentication(auth)))
+                        .content(objectMapper.writeValueAsString(customerDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(customerDTO.getEmail()));
     }
 
     @Test
-    void updateMyAvatar() throws Exception {
+    @WithMockUser(username = "test@test.com")
+    void testUpdateMyAvatar() throws Exception {
         mockMvc.perform(patch("/users/me/image")
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .with(authentication(auth))
                 .with(request -> {
                     request.addPart(mockImg2);
                     return request;
@@ -161,11 +155,10 @@ class CustomerControllerTest {
     }
 
     @Test
-    void showAvatarOnId() throws Exception {
-        mockMvc.perform(get("/users/me/image/" + customer.getId()).with(authentication(auth)))
+    @WithMockUser(username = "test@test.com")
+    void testShowAvatarOnId() throws Exception {
+        mockMvc.perform(get("/users/me/image/" + customer.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().bytes(customer.getAvatar()));
     }
-
-
 }

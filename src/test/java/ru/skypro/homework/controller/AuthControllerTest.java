@@ -1,6 +1,8 @@
 package ru.skypro.homework.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,25 +37,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Testcontainers
 class AuthControllerTest {
-
     @Autowired
     MockMvc mockMvc;
-
     @Autowired
     UserDetailsManager userDetailsManager;
-
     @Autowired
     private JdbcUserDetailsManager jdbcUserDetailsManager;
-
     private UserDetails userDetails;
     private RegisterReqDTO reqDTO;
-
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
+        objectMapper = new ObjectMapper();
         reqDTO = new RegisterReqDTO();
+        reqDTO.setFirstName("name");
+        reqDTO.setLastName("name");
+        reqDTO.setPhone("+79999999999");
         reqDTO.setPassword("password");
-        reqDTO.setUsername("test1@test.com");
+        reqDTO.setUsername("test@test.com");
         reqDTO.setRole(Role.USER);
         userDetails = new UserDetails() {
             @Override
@@ -94,6 +96,11 @@ class AuthControllerTest {
 
     }
 
+    @AfterEach
+    void tearDown() {
+        jdbcUserDetailsManager.deleteUser(reqDTO.getUsername());
+    }
+
     @Test
     void login_successfully() throws Exception {
         jdbcUserDetailsManager.createUser(userDetails);
@@ -104,29 +111,27 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonObject.toString()))
                 .andExpect(status().isOk());
-        jdbcUserDetailsManager.deleteUser(reqDTO.getUsername());
     }
 
 
     @Test
     void register_successfully() throws Exception {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("username", "test@test.com");
-        jsonObject.put("password", "pass");
+        reqDTO.setUsername("test1@test.com");
+
         mockMvc.perform(post("/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonObject.toString()))
+                        .content(objectMapper.writeValueAsString(reqDTO)))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
-        userDetails = jdbcUserDetailsManager.loadUserByUsername("test@test.com");
+        userDetails = jdbcUserDetailsManager.loadUserByUsername(reqDTO.getUsername());
 
         Authentication auth = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
                 userDetails.getPassword(),
                 userDetails.getAuthorities());
 
         mockMvc.perform(get("/users/me").with(authentication(auth))).andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("test@test.com"));
-        jdbcUserDetailsManager.deleteUser("test@test.com");
+                .andExpect(jsonPath("$.email").value(reqDTO.getUsername()));
+        jdbcUserDetailsManager.deleteUser(reqDTO.getUsername());
     }
 }

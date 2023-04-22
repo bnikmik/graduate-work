@@ -1,6 +1,7 @@
 package ru.skypro.homework.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,7 +41,7 @@ public class AdsController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addAd(@RequestPart("image") MultipartFile image, @RequestPart("properties") CreateAdsDTO properties, Authentication authentication) {
-        return ResponseEntity.ok(adsService.addAd(image, properties, authentication));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adsService.addAd(image, properties, authentication));
     }
 
     @PreAuthorize("@adsServiceImpl.getAdById(#id).email == authentication.name or hasAuthority('ROLE_ADMIN')")

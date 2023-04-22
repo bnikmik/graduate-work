@@ -6,9 +6,9 @@ import org.springframework.http.converter.json.AbstractJackson2HttpMessageConver
 import org.springframework.stereotype.Component;
 
 @Component
-public class Converter extends AbstractJackson2HttpMessageConverter {
+public class MessageConverter extends AbstractJackson2HttpMessageConverter {
 
-    protected Converter(ObjectMapper objectMapper) {
+    protected MessageConverter(ObjectMapper objectMapper) {
         super(objectMapper, MediaType.APPLICATION_OCTET_STREAM);
     }
 

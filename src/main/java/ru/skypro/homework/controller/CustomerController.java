@@ -37,13 +37,13 @@ public class CustomerController {
         return ResponseEntity.ok(customersService.updateMyInfo(customerDTO, authentication));
     }
 
-    @RequestMapping(value = "/me/image", method = RequestMethod.PATCH, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     private ResponseEntity<?> updateMyAvatar(@RequestPart("image") MultipartFile avatar, Authentication authentication) {
         customersService.updateMyImage(avatar, authentication);
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/me/image/{id}", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/me/image/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
     public @ResponseBody byte[] showAvatarOnId(@PathVariable("id") Integer id) {
         return customersService.showAvatarOnId(id);
     }

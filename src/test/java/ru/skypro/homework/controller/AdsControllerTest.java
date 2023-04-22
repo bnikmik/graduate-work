@@ -9,27 +9,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.skypro.homework.dto.AdsDTO;
-import ru.skypro.homework.enums.Role;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Customer;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CustomerRepository;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -46,14 +37,10 @@ class AdsControllerTest {
     @Autowired
     private AdRepository adRepository;
     @Autowired
-    private JdbcUserDetailsManager jdbcUserDetailsManager;
-    @Autowired
     private CustomerRepository customerRepository;
     private Customer customer;
-    private Authentication auth;
     private Ad ad;
     private AdsDTO adsDTO;
-    private UserDetails userDetails;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -84,58 +71,16 @@ class AdsControllerTest {
         adsDTO.setPk(ad.getId());
         adsDTO.setPrice(ad.getPrice());
         adsDTO.setTitle(ad.getTitle());
-
-        userDetails = new UserDetails() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return List.of(new SimpleGrantedAuthority(Role.USER.name()));
-            }
-
-            @Override
-            public String getPassword() {
-                return "password";
-            }
-
-            @Override
-            public String getUsername() {
-                return customer.getUsername();
-            }
-
-            @Override
-            public boolean isAccountNonExpired() {
-                return true;
-            }
-
-            @Override
-            public boolean isAccountNonLocked() {
-                return true;
-            }
-
-            @Override
-            public boolean isCredentialsNonExpired() {
-                return true;
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
-        };
-        jdbcUserDetailsManager.createUser(userDetails);
-        auth = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
-                userDetails.getPassword(),
-                userDetails.getAuthorities());
     }
 
     @AfterEach
     void tearDown() {
-        jdbcUserDetailsManager.deleteUser(customer.getUsername());
         customerRepository.deleteAll();
         adRepository.deleteAll();
     }
 
     @Test
-    void getAllAds() throws Exception {
+    void testGetAllAds() throws Exception {
         mockMvc.perform(get("/ads"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count").isNumber())
@@ -144,7 +89,8 @@ class AdsControllerTest {
     }
 
     @Test
-    void addAd() throws Exception {
+    @WithMockUser(username = "test@test.com")
+    void testAddAd() throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("description", ad.getDescription());
         jsonObject.put("price", ad.getPrice());
@@ -153,9 +99,8 @@ class AdsControllerTest {
         MockPart created = new MockPart("properties", jsonObject.toString().getBytes());
         mockMvc.perform(multipart("/ads")
                         .part(mockImg)
-                        .part(created)
-                        .with(authentication(auth)))
-                .andExpect(status().isOk())
+                        .part(created))
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.author").value(adsDTO.getAuthor()))
                 .andExpect(jsonPath("$.title").value(adsDTO.getTitle()))
                 .andExpect(jsonPath("$.price").value(adsDTO.getPrice()));
@@ -163,8 +108,9 @@ class AdsControllerTest {
 
 
     @Test
-    void getAdById() throws Exception {
-        mockMvc.perform(get("/ads/" + ad.getId()).with(authentication(auth)))
+    @WithMockUser(username = "test@test.com")
+    void testGetAdById() throws Exception {
+        mockMvc.perform(get("/ads/" + ad.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pk").value(ad.getId()))
                 .andExpect(jsonPath("$.authorFirstName").value(customer.getFirstName()))
@@ -178,13 +124,15 @@ class AdsControllerTest {
     }
 
     @Test
-    void deleteAdById() throws Exception {
-        mockMvc.perform(delete("/ads/" + ad.getId()).with(authentication(auth)))
+    @WithMockUser(username = "test@test.com")
+    void testDeleteAdById() throws Exception {
+        mockMvc.perform(delete("/ads/" + ad.getId()))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void updateAd() throws Exception {
+    @WithMockUser(username = "test@test.com")
+    void testUpdateAd() throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("description", ad.getDescription());
         jsonObject.put("price", ad.getPrice());
@@ -192,7 +140,7 @@ class AdsControllerTest {
 
         mockMvc.perform(patch("/ads/" + ad.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonObject.toString()).with(authentication(auth)))
+                        .content(jsonObject.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.author").value(adsDTO.getAuthor()))
                 .andExpect(jsonPath("$.title").value(adsDTO.getTitle()))
@@ -201,18 +149,19 @@ class AdsControllerTest {
     }
 
     @Test
-    void getMyAds() throws Exception {
-        mockMvc.perform(get("/ads").with(authentication(auth)))
+    @WithMockUser(username = "test@test.com")
+    void testGetMyAds() throws Exception {
+        mockMvc.perform(get("/ads"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count").isNumber())
                 .andExpect(jsonPath("$.results").isArray());
     }
 
     @Test
-    void updateAdImage() throws Exception {
+    @WithMockUser(username = "test@test.com")
+    void testUpdateAdImage() throws Exception {
         mockMvc.perform(patch("/ads/" + ad.getId() + "/image")
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .with(authentication(auth))
                 .with(request -> {
                     request.addPart(mockImg2);
                     return request;
@@ -220,15 +169,17 @@ class AdsControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "test@test.com")
     void showImageOnId() throws Exception {
-        mockMvc.perform(get("/ads/image/" + ad.getId()).with(authentication(auth)))
+        mockMvc.perform(get("/ads/image/" + ad.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().bytes(ad.getImage()));
     }
 
     @Test
+    @WithMockUser(username = "test@test.com")
     void searchByTitle() throws Exception {
-        mockMvc.perform(get("/ads/search?title=" + ad.getTitle()).with(authentication(auth)))
+        mockMvc.perform(get("/ads/search?title=" + ad.getTitle()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count").isNumber())
                 .andExpect(jsonPath("$.results").isArray())
