@@ -1,4 +1,4 @@
-package ru.skypro.homework;
+package ru.skypro.homework.configuration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
