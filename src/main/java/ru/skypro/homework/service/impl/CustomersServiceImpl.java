@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.CustomerDTO;
 import ru.skypro.homework.dto.NewPasswordDTO;
-import ru.skypro.homework.exception.BadParamException;
+import ru.skypro.homework.exception.BadRequestException;
 import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.model.Customer;
 import ru.skypro.homework.repository.CustomerRepository;
@@ -35,7 +35,7 @@ public class CustomersServiceImpl implements CustomersService {
     @Override
     public void setPassword(NewPasswordDTO newPasswordDTO, Authentication authentication) {
         if (newPasswordDTO.getNewPassword() == null || newPasswordDTO.getNewPassword().isBlank())
-            throw new BadParamException();
+            throw new BadRequestException();
         manager.changePassword(newPasswordDTO.getCurrentPassword(), encoder.encode(newPasswordDTO.getNewPassword()));
     }
 
@@ -50,7 +50,7 @@ public class CustomersServiceImpl implements CustomersService {
     public CustomerDTO updateMyInfo(CustomerDTO customerDTO, Authentication authentication) {
         if (customerDTO.getFirstName() == null || customerDTO.getFirstName().isBlank() ||
                 customerDTO.getLastName() == null || customerDTO.getLastName().isBlank() ||
-                customerDTO.getPhone() == null || customerDTO.getPhone().isBlank()) throw new BadParamException();
+                customerDTO.getPhone() == null || customerDTO.getPhone().isBlank()) throw new BadRequestException();
         Customer customer = customerRepository.findByUsername(authentication.getName())
                 .orElseThrow(NotFoundException::new);
         customer.setFirstName(customerDTO.getFirstName());

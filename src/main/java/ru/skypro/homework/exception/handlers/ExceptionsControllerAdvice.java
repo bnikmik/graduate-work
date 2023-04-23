@@ -3,7 +3,10 @@ package ru.skypro.homework.exception.handlers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.skypro.homework.exception.*;
+import ru.skypro.homework.exception.BadRequestException;
+import ru.skypro.homework.exception.ConflictException;
+import ru.skypro.homework.exception.ForbiddenException;
+import ru.skypro.homework.exception.NotFoundException;
 
 @ControllerAdvice
 public class ExceptionsControllerAdvice {
@@ -18,7 +21,7 @@ public class ExceptionsControllerAdvice {
         return ResponseEntity.status(403).build();
     }
 
-    @ExceptionHandler(BadParamException.class)
+    @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<?> badParam() {
         return ResponseEntity.status(400).build();
     }

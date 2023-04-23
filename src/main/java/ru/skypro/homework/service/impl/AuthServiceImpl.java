@@ -6,7 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.RegisterReqDTO;
-import ru.skypro.homework.exception.BadParamException;
+import ru.skypro.homework.exception.BadRequestException;
 import ru.skypro.homework.exception.ConflictException;
 import ru.skypro.homework.exception.ForbiddenException;
 import ru.skypro.homework.repository.CustomerRepository;
@@ -40,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
                 dto.getPassword() == null || dto.getPassword().isBlank() ||
                 dto.getFirstName() == null || dto.getFirstName().isBlank() ||
                 dto.getLastName() == null || dto.getLastName().isBlank() ||
-                dto.getPhone() == null || dto.getPhone().isBlank()) throw new BadParamException();
+                dto.getPhone() == null || dto.getPhone().isBlank()) throw new BadRequestException();
         if (manager.userExists(dto.getUsername())) {
             throw new ConflictException();
         }
