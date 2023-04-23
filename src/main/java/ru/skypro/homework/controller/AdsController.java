@@ -121,7 +121,7 @@ public class AdsController {
         return adsService.showImageOnId(id);
     }
 
-    @Operation(summary = "Получить объявления авторизованного пользователя")
+    @Operation(summary = "Получить объявления по ключевому")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseWrapperAdsDTO.class))}),

@@ -33,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 class CommentsControllerTest {
     private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
-    private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -114,7 +113,6 @@ class CommentsControllerTest {
                 .andExpect(jsonPath("$.author").value(commentDTO.getAuthor()))
                 .andExpect(jsonPath("$.authorImage").value(commentDTO.getAuthorImage()))
                 .andExpect(jsonPath("$.text").value(commentDTO.getText()));
-
     }
 
     @Test

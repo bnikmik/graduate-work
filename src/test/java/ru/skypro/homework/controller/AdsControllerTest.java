@@ -154,7 +154,8 @@ class AdsControllerTest {
         mockMvc.perform(get("/ads"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count").isNumber())
-                .andExpect(jsonPath("$.results").isArray());
+                .andExpect(jsonPath("$.results").isArray())
+                .andExpect(jsonPath("$.results[0].title").value(ad.getTitle()));
     }
 
     @Test

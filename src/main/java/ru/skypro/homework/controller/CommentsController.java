@@ -61,7 +61,7 @@ public class CommentsController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Добавить комментарий к объявлению")
+    @Operation(summary = "Обновление комментария к объявлению")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = CommentDTO.class))}),

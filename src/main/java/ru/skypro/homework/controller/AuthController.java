@@ -28,7 +28,7 @@ public class AuthController {
     @Tag(name = "Авторизация")
     @Operation(summary = "Авторизация пользователя")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = {@Content(mediaType = "application/json",
+            @ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = RegisterReqDTO.class))}),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content),
