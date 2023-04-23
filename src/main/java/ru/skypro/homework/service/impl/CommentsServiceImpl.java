@@ -31,7 +31,7 @@ public class CommentsServiceImpl implements CommentsService {
 
     @Override
     public ResponseWrapperCommentDTO getAllCommentsByAdId(Integer id) {
-        return ResponseWrapperCommentDTO.fromModel(commentRepository.findAll()
+        return ResponseWrapperCommentDTO.fromModel(commentRepository.findAllByAd_Id(id)
                 .stream()
                 .map(CommentDTO::fromModel)
                 .collect(Collectors.toList()));

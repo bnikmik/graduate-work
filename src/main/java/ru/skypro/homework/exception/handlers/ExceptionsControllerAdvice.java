@@ -23,11 +23,6 @@ public class ExceptionsControllerAdvice {
         return ResponseEntity.status(400).build();
     }
 
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<?> unauthorized() {
-        return ResponseEntity.status(401).build();
-    }
-
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<?> conflict() {
         return ResponseEntity.status(409).build();
