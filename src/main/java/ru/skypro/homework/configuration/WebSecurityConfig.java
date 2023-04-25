@@ -27,7 +27,8 @@ public class WebSecurityConfig extends GlobalMethodSecurityConfiguration {
             "/login",
             "/register",
             "/ads",
-            "/ads/image/**"
+            "/ads/image/**",
+            "/users/me/image/**"
     };
     private final DataSource dataSource;
 
@@ -54,8 +55,9 @@ public class WebSecurityConfig extends GlobalMethodSecurityConfiguration {
                                         .mvcMatchers(AUTH_WHITELIST)
                                         .permitAll()
                                         .mvcMatchers("/ads/**", "/users/**")
-                                        .authenticated()).
-                cors().and()
+                                        .authenticated()
+                )
+                .cors().and()
                 .httpBasic(withDefaults());
         return http.build();
     }
