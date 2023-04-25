@@ -11,9 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.test.annotation.DirtiesContext;
@@ -22,15 +22,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.skypro.homework.dto.RegisterReqDTO;
 import ru.skypro.homework.enums.Role;
 
-import java.util.Collection;
-import java.util.List;
-
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.skypro.homework.enums.Role.USER;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -46,6 +44,8 @@ class AuthControllerTest {
     private UserDetails userDetails;
     private RegisterReqDTO reqDTO;
     private ObjectMapper objectMapper;
+    @Autowired
+    private PasswordEncoder encoder;
 
     @BeforeEach
     void setUp() {
@@ -57,43 +57,12 @@ class AuthControllerTest {
         reqDTO.setPassword("password");
         reqDTO.setUsername("test@test.com");
         reqDTO.setRole(Role.USER);
-        userDetails = new UserDetails() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return List.of(new SimpleGrantedAuthority(reqDTO.getRole().name()));
-            }
-
-            @Override
-            public String getPassword() {
-                return reqDTO.getPassword();
-            }
-
-            @Override
-            public String getUsername() {
-                return reqDTO.getUsername();
-            }
-
-            @Override
-            public boolean isAccountNonExpired() {
-                return true;
-            }
-
-            @Override
-            public boolean isAccountNonLocked() {
-                return true;
-            }
-
-            @Override
-            public boolean isCredentialsNonExpired() {
-                return true;
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
-        };
-
+        userDetails = User.builder()
+                .passwordEncoder(this.encoder::encode)
+                .password(reqDTO.getPassword())
+                .username(reqDTO.getUsername())
+                .roles(USER.name())
+                .build();
     }
 
     @AfterEach

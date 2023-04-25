@@ -9,9 +9,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
@@ -19,16 +19,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import ru.skypro.homework.dto.CustomerDTO;
-import ru.skypro.homework.enums.Role;
 import ru.skypro.homework.model.Customer;
 import ru.skypro.homework.repository.CustomerRepository;
-
-import java.util.Collection;
-import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ru.skypro.homework.enums.Role.USER;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -36,6 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 class CustomerControllerTest {
 
+    private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
+    private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -44,9 +43,9 @@ class CustomerControllerTest {
     private JdbcUserDetailsManager jdbcUserDetailsManager;
     private ObjectMapper objectMapper;
     private CustomerDTO customerDTO;
+    @Autowired
+    private PasswordEncoder encoder;
     private Customer customer;
-    private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
-    private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
 
     @BeforeEach
     void setUp() throws Exception {
@@ -67,42 +66,13 @@ class CustomerControllerTest {
         customerDTO.setLastName(customer.getLastName());
         customerDTO.setPhone(customer.getPhone());
         customerDTO.setImage("/users/me/image/" + customer.getId());
-        UserDetails userDetails = new UserDetails() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                return List.of(new SimpleGrantedAuthority(Role.USER.name()));
-            }
 
-            @Override
-            public String getPassword() {
-                return "password";
-            }
-
-            @Override
-            public String getUsername() {
-                return customer.getUsername();
-            }
-
-            @Override
-            public boolean isAccountNonExpired() {
-                return true;
-            }
-
-            @Override
-            public boolean isAccountNonLocked() {
-                return true;
-            }
-
-            @Override
-            public boolean isCredentialsNonExpired() {
-                return true;
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return true;
-            }
-        };
+        UserDetails userDetails = User.builder()
+                .passwordEncoder(this.encoder::encode)
+                .password("password")
+                .username(customer.getUsername())
+                .roles(USER.name())
+                .build();
         jdbcUserDetailsManager.createUser(userDetails);
     }
 

@@ -31,7 +31,7 @@ public class AuthServiceImpl implements AuthService {
     public void login(String userName, String password) {
         if (!manager.userExists(userName)) throw new ForbiddenException();
         UserDetails userDetails = manager.loadUserByUsername(userName);
-        encoder.matches(password, userDetails.getPassword());
+        if (!encoder.matches(password, userDetails.getPassword())) throw new ForbiddenException();
     }
 
     @Override
