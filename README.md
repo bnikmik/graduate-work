@@ -42,7 +42,7 @@
 * Test:
     - Mockito
 * Frontend:
-    - Docker образ
+    - Docker образ 
 
 ### Запуск
 ***
