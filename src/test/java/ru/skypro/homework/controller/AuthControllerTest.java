@@ -14,13 +14,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.skypro.homework.dto.RegisterReqDTO;
+import ru.skypro.homework.dto.customerDTO.RegisterReqDTO;
 import ru.skypro.homework.enums.Role;
+import ru.skypro.homework.model.Customer;
+import ru.skypro.homework.repository.CustomerRepository;
+import ru.skypro.homework.service.impl.CustomUserDetailsService;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -40,7 +42,9 @@ class AuthControllerTest {
     @Autowired
     UserDetailsManager userDetailsManager;
     @Autowired
-    private JdbcUserDetailsManager jdbcUserDetailsManager;
+    CustomerRepository customerRepository;
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
     private UserDetails userDetails;
     private RegisterReqDTO reqDTO;
     private ObjectMapper objectMapper;
@@ -49,6 +53,16 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
+        Customer customer = new Customer();
+        customer.setUsername("1@mail.ru");
+        customer.setFirstName("firstTest");
+        customer.setLastName("lastTest");
+        customer.setPhone("+79990002233");
+        customer.setPassword(encoder.encode("1234qwer"));
+        customer.setEnabled(true);
+        customer.setRole(Role.USER);
+        customerRepository.save(customer);
+
         objectMapper = new ObjectMapper();
         reqDTO = new RegisterReqDTO();
         reqDTO.setFirstName("name");
@@ -57,6 +71,7 @@ class AuthControllerTest {
         reqDTO.setPassword("password");
         reqDTO.setUsername("test@test.com");
         reqDTO.setRole(Role.USER);
+
         userDetails = User.builder()
                 .passwordEncoder(this.encoder::encode)
                 .password(reqDTO.getPassword())
@@ -67,15 +82,14 @@ class AuthControllerTest {
 
     @AfterEach
     void tearDown() {
-        jdbcUserDetailsManager.deleteUser(reqDTO.getUsername());
+        customerRepository.deleteAll();
     }
 
     @Test
     void login_successfully() throws Exception {
-        jdbcUserDetailsManager.createUser(userDetails);
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("password", reqDTO.getPassword());
-        jsonObject.put("username", reqDTO.getUsername());
+        jsonObject.put("password", "1234qwer");
+        jsonObject.put("username", "1@mail.ru");
         mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonObject.toString()))
@@ -93,7 +107,7 @@ class AuthControllerTest {
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        userDetails = jdbcUserDetailsManager.loadUserByUsername(reqDTO.getUsername());
+        userDetails = userDetailsService.loadUserByUsername(reqDTO.getUsername());
 
         Authentication auth = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
                 userDetails.getPassword(),
@@ -101,6 +115,5 @@ class AuthControllerTest {
 
         mockMvc.perform(get("/users/me").with(authentication(auth))).andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(reqDTO.getUsername()));
-        jdbcUserDetailsManager.deleteUser(reqDTO.getUsername());
     }
 }

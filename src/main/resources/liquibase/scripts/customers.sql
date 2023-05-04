@@ -3,11 +3,14 @@
 
 create table customers
 (
-    id         serial primary key,
+    id         serial       not null primary key,
+    username   varchar(100) unique not null,
+    password   varchar(255) not null,
+    first_name varchar(100) not null,
+    last_name  varchar(100) not null,
     avatar     bytea,
-    first_name varchar(255),
-    last_name  varchar(255),
-    phone      varchar(255),
-    username   varchar(255)
+    phone      varchar(100) not null,
+    role       varchar(255),
+    enabled    boolean      not null
 );
 

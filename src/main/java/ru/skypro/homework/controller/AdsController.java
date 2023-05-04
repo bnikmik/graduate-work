@@ -14,14 +14,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.AdsDTO;
-import ru.skypro.homework.dto.CreateAdsDTO;
-import ru.skypro.homework.dto.FullAdsDTO;
-import ru.skypro.homework.dto.ResponseWrapperAdsDTO;
+import ru.skypro.homework.dto.adsDTO.AdsDTO;
+import ru.skypro.homework.dto.adsDTO.CreateAdsDTO;
+import ru.skypro.homework.dto.adsDTO.FullAdsDTO;
+import ru.skypro.homework.dto.adsDTO.ResponseWrapperAdsDTO;
 import ru.skypro.homework.service.AdsService;
 
 @RestController
-@CrossOrigin(value = "http://localhost:3000")
+@CrossOrigin("http://localhost:3000")
 @RequestMapping("/ads")
 @Tag(name = "Объявления")
 public class AdsController {

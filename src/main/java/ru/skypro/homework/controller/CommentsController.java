@@ -11,12 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.CommentDTO;
-import ru.skypro.homework.dto.ResponseWrapperCommentDTO;
+import ru.skypro.homework.dto.commentDTO.CommentDTO;
+import ru.skypro.homework.dto.commentDTO.ResponseWrapperCommentDTO;
 import ru.skypro.homework.service.CommentsService;
 
 @RestController
-@CrossOrigin(value = "http://localhost:3000")
+@CrossOrigin("http://localhost:3000")
 @RequestMapping("/ads")
 @Tag(name = "Комментарии")
 public class CommentsController {

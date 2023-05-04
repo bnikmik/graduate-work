@@ -4,10 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skypro.homework.dto.CommentDTO;
-import ru.skypro.homework.dto.ResponseWrapperCommentDTO;
+import ru.skypro.homework.dto.commentDTO.CommentDTO;
+import ru.skypro.homework.dto.commentDTO.ResponseWrapperCommentDTO;
 import ru.skypro.homework.exception.BadRequestException;
 import ru.skypro.homework.exception.NotFoundException;
+import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CommentRepository;
@@ -31,20 +32,20 @@ public class CommentsServiceImpl implements CommentsService {
 
     @Override
     public ResponseWrapperCommentDTO getAllCommentsByAdId(Integer id) {
-        return ResponseWrapperCommentDTO.fromModel(commentRepository.findAllByAd_Id(id)
+        return CommentMapper.fromModelToRWCDto(commentRepository.findAllByAd_Id(id)
                 .stream()
-                .map(CommentDTO::fromModel)
+                .map(CommentMapper::fromModelToDto)
                 .collect(Collectors.toList()));
     }
 
     @Override
     public CommentDTO addCommentToAdById(Integer id, CommentDTO commentDTO, Authentication authentication) {
         if (commentDTO.getText() == null || commentDTO.getText().isBlank()) throw new BadRequestException();
-        Comment comment = commentDTO.toModel();
+        Comment comment = CommentMapper.fromDtoToModel(commentDTO);
         comment.setCustomer(customerRepository.findByUsername(authentication.getName()).orElseThrow(NotFoundException::new));
         comment.setAd(adRepository.findById(id).orElseThrow(NotFoundException::new));
         commentRepository.save(comment);
-        return CommentDTO.fromModel(comment);
+        return CommentMapper.fromModelToDto(comment);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class CommentsServiceImpl implements CommentsService {
         if (commentDTO.getText() == null || commentDTO.getText().isBlank()) throw new BadRequestException();
         Comment comment = commentRepository.findByIdAndAdId(commentId, adId).orElseThrow(NotFoundException::new);
         comment.setText(commentDTO.getText());
-        return CommentDTO.fromModel(commentRepository.save(comment));
+        return CommentMapper.fromModelToDto(commentRepository.save(comment));
     }
 
     public Comment getById(Integer id) {
