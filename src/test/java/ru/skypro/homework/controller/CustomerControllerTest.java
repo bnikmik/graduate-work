@@ -9,23 +9,20 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import ru.skypro.homework.dto.CustomerDTO;
+import ru.skypro.homework.dto.customerDTO.CustomerDTO;
 import ru.skypro.homework.model.Customer;
 import ru.skypro.homework.repository.CustomerRepository;
+import ru.skypro.homework.service.impl.CustomUserDetailsService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static ru.skypro.homework.enums.Role.USER;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -40,7 +37,7 @@ class CustomerControllerTest {
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired
-    private JdbcUserDetailsManager jdbcUserDetailsManager;
+    private CustomUserDetailsService userDetailsService;
     private ObjectMapper objectMapper;
     private CustomerDTO customerDTO;
     @Autowired
@@ -53,6 +50,8 @@ class CustomerControllerTest {
         customer = new Customer();
         customer.setId(1);
         customer.setUsername("test@test.com");
+        customer.setPassword(encoder.encode("1234qwer"));
+        customer.setEnabled(true);
         customer.setFirstName("testFirst");
         customer.setLastName("testLast");
         customer.setPhone("+79999999999");
@@ -66,19 +65,10 @@ class CustomerControllerTest {
         customerDTO.setLastName(customer.getLastName());
         customerDTO.setPhone(customer.getPhone());
         customerDTO.setImage("/users/me/image/" + customer.getId());
-
-        UserDetails userDetails = User.builder()
-                .passwordEncoder(this.encoder::encode)
-                .password("password")
-                .username(customer.getUsername())
-                .roles(USER.name())
-                .build();
-        jdbcUserDetailsManager.createUser(userDetails);
     }
 
     @AfterEach
     void tearDown() {
-        jdbcUserDetailsManager.deleteUser(customer.getUsername());
         customerRepository.deleteAll();
     }
 

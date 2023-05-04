@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import ru.skypro.homework.dto.LoginReqDTO;
-import ru.skypro.homework.dto.RegisterReqDTO;
+import ru.skypro.homework.dto.customerDTO.LoginReqDTO;
+import ru.skypro.homework.dto.customerDTO.RegisterReqDTO;
 import ru.skypro.homework.service.AuthService;
 
 @Slf4j
-@CrossOrigin(value = "http://localhost:3000")
+@CrossOrigin("http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
 public class AuthController {

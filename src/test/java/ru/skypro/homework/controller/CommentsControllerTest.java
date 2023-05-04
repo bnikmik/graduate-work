@@ -8,12 +8,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import ru.skypro.homework.dto.CommentDTO;
+import ru.skypro.homework.dto.commentDTO.CommentDTO;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.model.Customer;
@@ -42,6 +43,8 @@ class CommentsControllerTest {
     private ObjectMapper objectMapper;
     @Autowired
     private CommentRepository commentRepository;
+    @Autowired
+    private PasswordEncoder encoder;
     private Ad ad;
     private Comment comment;
     private CommentDTO commentDTO;
@@ -52,6 +55,8 @@ class CommentsControllerTest {
         Customer customer = new Customer();
         customer.setId(1);
         customer.setUsername("test@test.com");
+        customer.setEnabled(true);
+        customer.setPassword(encoder.encode("1234qwer"));
         customer.setFirstName("testFirst");
         customer.setLastName("testLast");
         customer.setPhone("+79999999999");

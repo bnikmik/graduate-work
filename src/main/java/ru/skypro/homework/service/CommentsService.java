@@ -1,8 +1,8 @@
 package ru.skypro.homework.service;
 
 import org.springframework.security.core.Authentication;
-import ru.skypro.homework.dto.CommentDTO;
-import ru.skypro.homework.dto.ResponseWrapperCommentDTO;
+import ru.skypro.homework.dto.commentDTO.CommentDTO;
+import ru.skypro.homework.dto.commentDTO.ResponseWrapperCommentDTO;
 
 public interface CommentsService {
     ResponseWrapperCommentDTO getAllCommentsByAdId(Integer id);

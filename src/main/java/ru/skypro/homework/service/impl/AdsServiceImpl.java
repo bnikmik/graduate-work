@@ -5,12 +5,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.AdsDTO;
-import ru.skypro.homework.dto.CreateAdsDTO;
-import ru.skypro.homework.dto.FullAdsDTO;
-import ru.skypro.homework.dto.ResponseWrapperAdsDTO;
+import ru.skypro.homework.dto.adsDTO.AdsDTO;
+import ru.skypro.homework.dto.adsDTO.CreateAdsDTO;
+import ru.skypro.homework.dto.adsDTO.FullAdsDTO;
+import ru.skypro.homework.dto.adsDTO.ResponseWrapperAdsDTO;
 import ru.skypro.homework.exception.BadRequestException;
 import ru.skypro.homework.exception.NotFoundException;
+import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CustomerRepository;
@@ -33,9 +34,9 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public ResponseWrapperAdsDTO getAllAds() {
-        return ResponseWrapperAdsDTO.fromModel(adRepository.findAll()
+        return AdsMapper.fromModelToRWADto(adRepository.findAll()
                 .stream()
-                .map(AdsDTO::fromModel)
+                .map(AdsMapper::fromModelToAdsDTO)
                 .collect(Collectors.toList()));
     }
 
@@ -44,7 +45,7 @@ public class AdsServiceImpl implements AdsService {
         if (properties.getDescription() == null || properties.getDescription().isBlank() ||
                 properties.getTitle() == null || properties.getTitle().isBlank())
             throw new BadRequestException();
-        Ad ad = properties.toModel();
+        Ad ad = AdsMapper.mapFromCreateAds(properties);
         ad.setCustomer(customerRepository.findByUsername(authentication.getName())
                 .orElseThrow(NotFoundException::new));
         try {
@@ -52,12 +53,12 @@ public class AdsServiceImpl implements AdsService {
         } catch (IOException e) {
             log.info(e.getMessage());
         }
-        return AdsDTO.fromModel(adRepository.save(ad));
+        return AdsMapper.fromModelToAdsDTO(adRepository.save(ad));
     }
 
     @Override
     public FullAdsDTO getAdById(Integer id) {
-        return FullAdsDTO.fromModel(adRepository.findById(id)
+        return AdsMapper.fromModelToFullDTO(adRepository.findById(id)
                 .orElseThrow(NotFoundException::new));
     }
 
@@ -76,7 +77,7 @@ public class AdsServiceImpl implements AdsService {
         ad.setTitle(properties.getTitle());
         ad.setDescription(properties.getDescription());
         ad.setPrice(properties.getPrice());
-        return AdsDTO.fromModel(adRepository.save(ad));
+        return AdsMapper.fromModelToAdsDTO(adRepository.save(ad));
     }
 
     @Override
@@ -84,7 +85,7 @@ public class AdsServiceImpl implements AdsService {
         ResponseWrapperAdsDTO wrapperAdsDTO = new ResponseWrapperAdsDTO();
         wrapperAdsDTO.setResults(adRepository.findAllByCustomer_Username(authentication.getName())
                 .stream()
-                .map(AdsDTO::fromModel)
+                .map(AdsMapper::fromModelToAdsDTO)
                 .collect(Collectors.toList()));
         wrapperAdsDTO.setCount(wrapperAdsDTO.getResults().size());
         return wrapperAdsDTO;
@@ -112,7 +113,7 @@ public class AdsServiceImpl implements AdsService {
         ResponseWrapperAdsDTO wrapperAdsDTO = new ResponseWrapperAdsDTO();
         wrapperAdsDTO.setResults(adRepository.findAllByTitleContainsIgnoreCase(title)
                 .stream()
-                .map(AdsDTO::fromModel)
+                .map(AdsMapper::fromModelToAdsDTO)
                 .collect(Collectors.toList()));
         wrapperAdsDTO.setCount(wrapperAdsDTO.getResults().size());
         return wrapperAdsDTO;

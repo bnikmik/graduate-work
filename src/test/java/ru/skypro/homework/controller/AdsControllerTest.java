@@ -1,5 +1,6 @@
 package ru.skypro.homework.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,11 +10,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.skypro.homework.dto.AdsDTO;
+import ru.skypro.homework.dto.adsDTO.AdsDTO;
+import ru.skypro.homework.dto.adsDTO.CreateAdsDTO;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Customer;
 import ru.skypro.homework.repository.AdRepository;
@@ -32,10 +35,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AdsControllerTest {
     private final MockPart mockImg = new MockPart("image", "image", "image".getBytes());
     private final MockPart mockImg2 = new MockPart("image", "image2", "image2".getBytes());
+    private final CreateAdsDTO createAds = new CreateAdsDTO();
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private AdRepository adRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private PasswordEncoder encoder;
     @Autowired
     private CustomerRepository customerRepository;
     private Customer customer;
@@ -49,6 +57,8 @@ class AdsControllerTest {
         customer.setUsername("test@test.com");
         customer.setFirstName("testFirst");
         customer.setLastName("testLast");
+        customer.setEnabled(true);
+        customer.setPassword(encoder.encode("1234qwer"));
         customer.setPhone("+79999999999");
         customer.setAds(new ArrayList<>() {{
             add(ad);
@@ -71,6 +81,10 @@ class AdsControllerTest {
         adsDTO.setPk(ad.getId());
         adsDTO.setPrice(ad.getPrice());
         adsDTO.setTitle(ad.getTitle());
+
+        createAds.setPrice(100);
+        createAds.setTitle("title");
+        createAds.setDescription("description");
     }
 
     @AfterEach
@@ -91,12 +105,7 @@ class AdsControllerTest {
     @Test
     @WithMockUser(username = "test@test.com")
     void testAddAd() throws Exception {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("description", ad.getDescription());
-        jsonObject.put("price", ad.getPrice());
-        jsonObject.put("title", ad.getTitle());
-
-        MockPart created = new MockPart("properties", jsonObject.toString().getBytes());
+        MockPart created = new MockPart("properties", objectMapper.writeValueAsBytes(createAds));
         mockMvc.perform(multipart("/ads")
                         .part(mockImg)
                         .part(created))

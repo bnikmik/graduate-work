@@ -7,10 +7,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.CustomerDTO;
-import ru.skypro.homework.dto.NewPasswordDTO;
+import ru.skypro.homework.dto.customerDTO.CustomerDTO;
+import ru.skypro.homework.dto.customerDTO.NewPasswordDTO;
 import ru.skypro.homework.exception.BadRequestException;
 import ru.skypro.homework.exception.NotFoundException;
+import ru.skypro.homework.mapper.CustomerMapper;
 import ru.skypro.homework.model.Customer;
 import ru.skypro.homework.repository.CustomerRepository;
 import ru.skypro.homework.service.CustomersService;
@@ -41,7 +42,7 @@ public class CustomersServiceImpl implements CustomersService {
 
     @Override
     public CustomerDTO getMyInfo(Authentication authentication) {
-        return CustomerDTO.fromModel(customerRepository
+        return CustomerMapper.fromModelToCustomerDTO(customerRepository
                 .findByUsername(authentication.getName())
                 .orElseThrow(NotFoundException::new));
     }

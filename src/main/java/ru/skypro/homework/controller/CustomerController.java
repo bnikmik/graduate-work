@@ -12,13 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.CustomerDTO;
-import ru.skypro.homework.dto.NewPasswordDTO;
+import ru.skypro.homework.dto.customerDTO.CustomerDTO;
+import ru.skypro.homework.dto.customerDTO.NewPasswordDTO;
 import ru.skypro.homework.service.CustomersService;
 
 @RestController
 @RequestMapping("/users")
-@CrossOrigin(value = "http://localhost:3000")
+@CrossOrigin("http://localhost:3000")
 @Tag(name = "Пользователи")
 public class CustomerController {
     private final CustomersService customersService;
